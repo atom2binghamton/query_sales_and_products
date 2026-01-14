@@ -8,8 +8,13 @@ def test_postgress_connection(connection_string):
 
         cur = conn.cursor()
 
-        cur.execute("SELECT version();")
-        db_version = cur.fetchone()
+        #cur.execute("SELECT version();")
+        sql_statement = """
+            SELECT * FROM ORDERDETAIL;
+        """
+        cur.execute(sql_statement)
+
+        db_version = cur.fetchall()
         print("Connection successful!")
         print(f"PostgresSQL version: {db_version}")
 
