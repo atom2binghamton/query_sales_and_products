@@ -19,46 +19,33 @@ DATABASE_SCHEMA = """
 Database Schema:
 
 LOOKUP TABLES:
-- genders (gender_id SERIAL PRIMARY KEY, gender_desc TEXT)
-- races (race_id SERIAL PRIMARY KEY, race_desc TEXT)
-- marital_statuses (marital_status_id SERIAL PRIMARY KEY, marital_status_desc TEXT)
-- languages (language_id SERIAL PRIMARY KEY, language_desc TEXT)
-- lab_units (unit_id SERIAL PRIMARY KEY, unit_string TEXT)
-- lab_tests (lab_test_id SERIAL PRIMARY KEY, lab_name TEXT, unit_id INTEGER)
-- diagnosis_codes (diagnosis_code TEXT PRIMARY KEY, diagnosis_description TEXT)
+- Region (RegionID SERIAL PRIMARY KEY, Region TEXT NOT NULL)
+- Country (CountryID SERIAL PRIMARY KEY, Country TEXT NOT NULL, RegionID INTEGER NOT NULL REFERENCES Region(RegionID))
+- ProductCategory (ProductCategoryID SERIAL PRIMARY KEY, ProductCategory TEXT NOT NULL, ProductCategoryDescription TEXT NOT NULL)
 
 CORE TABLES:
-- patients (
-    patient_id TEXT PRIMARY KEY,
-    patient_gender INTEGER (FK to genders),
-    patient_dob TIMESTAMP,
-    patient_race INTEGER (FK to races),
-    patient_marital_status INTEGER (FK to marital_statuses),
-    patient_language INTEGER (FK to languages),
-    patient_population_pct_below_poverty REAL
+- Customer (
+    CustomerID SERIAL PRIMARY KEY,
+    FirstName TEXT NOT NULL,
+    LastName TEXT NOT NULL,
+    Address TEXT NOT NULL,
+    City TEXT NOT NULL,
+    CountryID INTEGER NOT NULL REFERENCES Country(CountryID)
   )
 
-- admissions (
-    patient_id TEXT,
-    admission_id INTEGER,
-    admission_start TIMESTAMP,
-    admission_end TIMESTAMP,
-    PRIMARY KEY (patient_id, admission_id)
+- Product (
+    ProductID SERIAL PRIMARY KEY,
+    ProductName TEXT NOT NULL,
+    ProductUnitPrice REAL NOT NULL,
+    ProductCategoryID INTEGER NOT NULL REFERENCES ProductCategory(ProductCategoryID)
   )
 
-- admission_primary_diagnoses (
-    patient_id TEXT,
-    admission_id INTEGER,
-    diagnosis_code TEXT (FK to diagnosis_codes),
-    PRIMARY KEY (patient_id, admission_id)
-  )
-
-- admission_lab_results (
-    patient_id TEXT,
-    admission_id INTEGER,
-    lab_test_id INTEGER (FK to lab_tests),
-    lab_value REAL,
-    lab_datetime TIMESTAMP
+- OrderDetail (
+    OrderID SERIAL PRIMARY KEY,
+    CustomerID INTEGER NOT NULL REFERENCES Customer(CustomerID),
+    ProductID INTEGER NOT NULL REFERENCES Product(ProductID),
+    OrderDate TIMESTAMP NOT NULL,
+    QuantityOrdered INTEGER NOT NULL
   )
 
 IMPORTANT NOTES:
@@ -210,10 +197,10 @@ def main():
     Try asking questions like:
                         
     **Demographics:**
-    - How many patients do we have by gender?
+    - How many customers do we have in each city?
                         
-    **Admissions:**
-    - What is the average length of stay?                      
+    **Sales:**
+    - What is the average quantity ordered of each product?                      
     """)
     st.sidebar.markdown("---")
     st.sidebar.info("""
@@ -244,7 +231,7 @@ def main():
     user_question = st.text_area(
         " What would you like to know?",
         height=100, 
-        placeholder="What is the average length of stay?    "
+        placeholder="How many customers do we have in each city?"
     )
 
     col1, col2, col3 = st.columns([1, 1, 4])
